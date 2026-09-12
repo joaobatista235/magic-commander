@@ -48,13 +48,7 @@ export default function TokenModal({ onClose }: TokenModalProps) {
   }, [query]);
 
   const handleSelectToken = (token: any) => {
-    // try to parse P/T
-    const pt = token.power ? `${token.power}/${token.toughness}` : '';
-    const typeLine = token.type_line || 'Token';
     const imageUrl = token.image_uris.normal;
-    // We modify createToken to accept full scryfall data or just strings
-    // In battlefieldStore, typeLine is built like `Token Criatura — ${power}/${toughness}`
-    // If we pass power=token.power and toughness=token.toughness it works.
     createToken(token.name, token.power || '', token.toughness || '', imageUrl);
     onClose();
   };

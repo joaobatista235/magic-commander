@@ -7,7 +7,7 @@ import TokenModal from './TokenModal';
 import ChatPanel from './ChatPanel';
 import ActionLog, { logAction } from './ActionLog';
 import ConfirmModal from '@/components/ConfirmModal';
-import { Layers, BookOpen, Flame, Crown, Swords, Heart, Skull, Sparkles, RotateCw, Check, Ghost, Sword, ShieldAlert } from 'lucide-react';
+import { Layers, BookOpen, Flame, Crown, Swords, Heart, Skull, Sparkles, RotateCw, Check, Ghost, Sword } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { leaveRoom } from '@/services/lobbyService';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -81,7 +81,6 @@ export default function GameBoard({ navigate, roomId, userId }: GameBoardProps) 
   const handleChangeLife = (userId: string, delta: number) => {
     changeLife(userId, delta);
     const myName = user?.displayName || 'Você';
-    const sign = delta > 0 ? '+' : '';
     logAction({ type: 'life', actorName: myName, message: `${delta > 0 ? 'ganhou' : 'perdeu'} ${Math.abs(delta)} ponto${Math.abs(delta) !== 1 ? 's' : ''} de vida.` });
   };
 

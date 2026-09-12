@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useBattlefieldStore, type Arrow } from '@/stores/battlefieldStore';
+import { useEffect, useState } from 'react';
+import { useBattlefieldStore } from '@/stores/battlefieldStore';
 
 export default function ArrowOverlay() {
   const { arrows, drawingArrowFrom, clearArrows } = useBattlefieldStore();

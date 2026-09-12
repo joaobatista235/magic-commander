@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Mail, Edit3, Check, Loader2, LogOut } from 'lucide-react';
+import { ArrowLeft, Mail, Edit3, Check, Loader2, LogOut } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { motion } from 'framer-motion';
 

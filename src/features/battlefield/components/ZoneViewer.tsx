@@ -1,7 +1,6 @@
 import { useBattlefieldStore, type GameCardInstance, type Zone } from '@/stores/battlefieldStore';
 import { useAuthStore } from '@/stores/authStore';
 import { X } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 interface ZoneViewerProps {
   zone: 'GRAVEYARD' | 'EXILE' | 'LIBRARY';

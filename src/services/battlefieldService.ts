@@ -35,14 +35,12 @@ class BattlefieldService {
   private channel: RealtimeChannel | null = null;
   private onMessageCallback: ((event: BattlefieldEvent) => void) | null = null;
   private chatListeners: Array<(msg: ChatMessage) => void> = [];
-  private roomId: string | null = null;
 
   connect(roomId: string, onMessage: (event: BattlefieldEvent) => void) {
     if (this.channel) {
       this.disconnect();
     }
 
-    this.roomId = roomId;
     this.onMessageCallback = onMessage;
 
     this.channel = supabase.channel(`battlefield:${roomId}`, {
@@ -71,7 +69,6 @@ class BattlefieldService {
       supabase.removeChannel(this.channel);
       this.channel = null;
     }
-    this.roomId = null;
     this.onMessageCallback = null;
     this.chatListeners = [];
   }

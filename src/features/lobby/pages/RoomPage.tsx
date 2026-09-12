@@ -149,9 +149,6 @@ export default function RoomPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {players.map((player) => {
             const isMe = player.user_id === user?.id;
-            const myDeck = isMe && player.deck_id
-              ? decks.find(d => d.id === player.deck_id)
-              : null;
 
             return (
               <div
@@ -187,7 +184,7 @@ export default function RoomPage() {
                   </div>
 
                   {player.user_id === currentRoom.owner_id && (
-                    <Crown className="h-4 w-4 text-zinc-600 shrink-0" title="Dono da sala" />
+                    <Crown className="h-4 w-4 text-zinc-600 shrink-0" aria-label="Dono da sala" />
                   )}
                 </div>
 

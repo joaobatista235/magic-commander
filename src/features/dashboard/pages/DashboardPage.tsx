@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useDeckStore } from '@/stores/deckStore';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Layers, Play, Trash2, LogOut, Loader2, Upload } from 'lucide-react';
+import { Plus, Layers, Play, Trash2, LogOut, Upload } from 'lucide-react';
 import { fetchDecks, deleteDeckRemote } from '@/services/deckService';
 import ImportDeckModal from '@/features/deck-builder/components/ImportDeckModal';
 
@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export default function DashboardPage() {
   const user = useAuthStore((state) => state.user);
-  const { decks, createNewDeck, loadDeck, deleteDeck, saveCurrentDeck, setDecks, syncing, setSyncing } = useDeckStore();
+  const { decks, createNewDeck, loadDeck, deleteDeck, saveCurrentDeck, setDecks, setSyncing } = useDeckStore();
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
   const [showImport, setShowImport] = useState(false);

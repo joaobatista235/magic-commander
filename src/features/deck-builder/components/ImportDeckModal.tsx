@@ -96,7 +96,6 @@ async function fetchCollection(lines: ParsedLine[]): Promise<{ card: any; quanti
     // Mapear os resultados de volta às linhas originais por posição
     // A Scryfall retorna na mesma ordem dos identifiers, mas pode omitir os não encontrados
     // Para mapeamento correto, usamos o campo 'not_found' da resposta
-    const notFoundList: any[] = data.not_found || [];
 
     // Montar mapa de set+number ou nome para correspondência
     fetched.forEach((card: any) => {
@@ -174,7 +173,7 @@ export default function ImportDeckModal({ onClose, onImported }: ImportDeckModal
     setProgress('Montando deck...');
 
     // Criar novo deck e adicionar cartas
-    const deckId = createNewDeck();
+    createNewDeck();
 
     for (const { card, quantity, isCommander } of fetched) {
       for (let i = 0; i < quantity; i++) {
