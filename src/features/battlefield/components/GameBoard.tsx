@@ -1,4 +1,4 @@
-import { useBattlefieldStore, type GameCardInstance } from '@/stores/battlefieldStore';
+import { useBattlefieldStore } from '@/stores/battlefieldStore';
 import { useAuthStore } from '@/stores/authStore';
 import GameCard from './GameCard';
 import ZoneViewer from './ZoneViewer';
@@ -12,11 +12,7 @@ import { useState, useEffect, useRef } from 'react';
 import { leaveRoom } from '@/services/lobbyService';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const MOCK_OPPONENTS = [
-  { userId: 'opp1', life: 40, commanderDamage: {} as Record<string,number>, name: 'Jogador 2' },
-  { userId: 'opp2', life: 38, commanderDamage: {} as Record<string,number>, name: 'Jogador 3' },
-  { userId: 'opp3', life: 35, commanderDamage: {} as Record<string,number>, name: 'Jogador 4' },
-];
+
 
 interface GameBoardProps {
   navigate: (path: string) => void;
@@ -30,7 +26,7 @@ export default function GameBoard({ navigate, roomId, userId }: GameBoardProps) 
   const user = useAuthStore(state => state.user);
   const [viewingZone, setViewingZone] = useState<'GRAVEYARD' | 'EXILE' | 'LIBRARY' | null>(null);
   const [viewingZoneUser, setViewingZoneUser] = useState<string | null>(null);
-  const [showMockOpponents, setShowMockOpponents] = useState(false);
+
   const [isCreatingToken, setIsCreatingToken] = useState(false);
   const [zoom, setZoom] = useState(0.8);
   const [isShuffled, setIsShuffled] = useState(false);
@@ -57,12 +53,11 @@ export default function GameBoard({ navigate, roomId, userId }: GameBoardProps) 
   };
 
   const realOpponents = Object.values(players).filter(p => p.userId !== myUserId);
-  const displayOpponents = (showMockOpponents && realOpponents.length === 0) ? MOCK_OPPONENTS : realOpponents;
 
   const spawnX = () => Math.max(20, (window.innerWidth - 240) / 2 - 50);
   const spawnY = () => Math.max(20, (window.innerHeight * 0.45) / 2 - 70);
 
-  const isMyTurn = activePlayerId === myUserId || !activePlayerId;
+  const isMyTurn = activePlayerId === myUserId;
 
   // Watch for death (life reaching 0 or below)
   useEffect(() => {
@@ -139,15 +134,6 @@ export default function GameBoard({ navigate, roomId, userId }: GameBoardProps) 
         </motion.div>
       )}
 
-      {/* Botao Sair da Mesa */}
-      <div className="absolute top-3 left-3 z-50">
-        <button
-          onClick={() => setShowLeaveConfirm(true)}
-          className="flex items-center gap-1.5 bg-zinc-900/80 backdrop-blur border border-zinc-800 text-zinc-500 hover:text-red-400 hover:border-red-900/40 px-3 py-1.5 rounded-lg transition-colors text-xs font-medium"
-        >
-          Sair da Mesa
-        </button>
-      </div>
 
       {/* Visualizador de carta em foco (hover) */}
       {hoveredCardBoard && hoveredCardBoard.imageUrl && (
@@ -167,36 +153,15 @@ export default function GameBoard({ navigate, roomId, userId }: GameBoardProps) 
 
         {/* Metade Superior: Oponentes */}
         <div className="flex border-b-2 border-zinc-800" style={{ height: '45%', minHeight: 0 }}>
-          {displayOpponents.length === 0 ? (
+          {realOpponents.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-zinc-700">
               <Swords className="w-12 h-12 opacity-20 text-zinc-500" />
               <p className="font-medium italic text-sm">Aguardando oponentes...</p>
-              <button
-                onClick={() => setShowMockOpponents(true)}
-                className="text-xs text-zinc-700 hover:text-amber-500 underline transition-colors"
-              >
-                Visualizar layout de 4 jogadores
-              </button>
             </div>
           ) : (
-            displayOpponents.map((opponent, index) => {
-              const isLast = index === displayOpponents.length - 1;
-              let oppCards = visibleCards.filter(c => c.ownerId === opponent.userId);
-              if (opponent.userId.startsWith('opp')) {
-                oppCards = Array.from({ length: 15 }).map((_, i) => ({
-                  instanceId: `mock-${opponent.userId}-${i}`,
-                  ownerId: opponent.userId,
-                  scryfallId: 'mock',
-                  name: 'Carta Simulada',
-                  imageUrl: 'https://cards.scryfall.io/normal/front/1/c/1c1f73d4-6331-4820-8025-56de05252875.jpg',
-                  zone: 'BATTLEFIELD',
-                  x: 20 + (i % 5) * 110,
-                  y: 20 + Math.floor(i / 5) * 150,
-                  tapped: i % 4 === 0,
-                  faceDown: i % 3 === 0,
-                  isCommander: false
-                } as GameCardInstance));
-              }
+            realOpponents.map((opponent, index) => {
+              const isLast = index === realOpponents.length - 1;
+              const oppCards = visibleCards.filter(c => c.ownerId === opponent.userId);
               const oppName = 'name' in opponent ? (opponent as any).name : `Jogador ${index + 2}`;
               const isOppTurn = activePlayerId === opponent.userId;
               return (
@@ -298,6 +263,16 @@ export default function GameBoard({ navigate, roomId, userId }: GameBoardProps) 
       {/* PAINEL LATERAL DIREITO */}
       <div className="w-[240px] shrink-0 border-l-2 border-zinc-800 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar" style={{ background: '#0a0a0c' }}>
 
+        {/* Sair da Mesa */}
+        <div className="p-2 border-b border-zinc-800">
+          <button
+            onClick={() => setShowLeaveConfirm(true)}
+            className="w-full py-1.5 text-[10px] font-bold uppercase tracking-wider bg-zinc-900 hover:bg-red-950/40 border border-zinc-800 hover:border-red-900/50 text-zinc-500 hover:text-red-400 rounded transition-colors"
+          >
+            Sair da Mesa
+          </button>
+        </div>
+
         {players[myUserId] && (
           <div className="p-4 border-b border-zinc-800">
             <p className="text-[10px] text-zinc-600 font-black uppercase tracking-widest mb-2 text-center">Minha Vida</p>
@@ -350,14 +325,15 @@ export default function GameBoard({ navigate, roomId, userId }: GameBoardProps) 
           </div>
         )}
 
-        {/* Commander Damage Tracker */}
-        {displayOpponents.length > 0 && myCommanderIds.length > 0 && (
+        {/* Commander Damage Tracker — only real opponents, never self */}
+        {realOpponents.length > 0 && myCommanderIds.length > 0 && (
           <div className="p-3 border-b border-zinc-800">
             <p className="text-[10px] text-red-500/70 font-black uppercase tracking-widest mb-2 flex items-center gap-1">
               <Sword className="w-3 h-3" /> Dano de Comandante
             </p>
-            {displayOpponents.map((opp, oi) => {
-              const oppName = 'name' in opp ? (opp as any).name : `J${oi + 2}`;
+            {realOpponents.map((opp, oi) => {
+              const oppPlayer = players[opp.userId];
+              const oppName = oppPlayer ? `Jogador ${oi + 2}` : `J${oi + 2}`;
               return (
                 <div key={opp.userId} className="mb-2">
                   <p className="text-[9px] text-zinc-600 font-bold truncate mb-1">{oppName}</p>

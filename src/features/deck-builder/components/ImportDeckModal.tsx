@@ -125,7 +125,7 @@ async function fetchCollection(lines: ParsedLine[]): Promise<{ card: any; quanti
 }
 
 export default function ImportDeckModal({ onClose, onImported }: ImportDeckModalProps) {
-  const { createNewDeck, saveCurrentDeck, addCard, setCommander } = useDeckStore();
+  const { createNewDeck, saveCurrentDeck, addCard, setCommander, loadDeck } = useDeckStore();
   const user = useAuthStore(state => state.user);
   const [text, setText] = useState('');
   const [deckName, setDeckName] = useState('');
@@ -173,7 +173,8 @@ export default function ImportDeckModal({ onClose, onImported }: ImportDeckModal
     setProgress('Montando deck...');
 
     // Criar novo deck e adicionar cartas
-    createNewDeck();
+    const deckId = createNewDeck();
+    loadDeck(deckId);
 
     for (const { card, quantity, isCommander } of fetched) {
       for (let i = 0; i < quantity; i++) {

@@ -17,7 +17,7 @@ export default function TurnControl() {
   const { currentPhase, setPhase, passTurn, activePlayerId, players, myUserId, untapAll } = useBattlefieldStore();
   const user = useAuthStore(state => state.user);
 
-  const isMyTurn = activePlayerId === myUserId || !activePlayerId;
+  const isMyTurn = activePlayerId === myUserId;
 
   const handlePhaseClick = (phase: TurnPhase) => {
     if (!isMyTurn) return;

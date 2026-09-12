@@ -113,7 +113,7 @@ export default function GameCard({ card, isDraggable = true, zoom = 1 }: GameCar
         onContextMenu={handleRightClick}
         onMouseEnter={() => setHoveredCardBoard(card)}
         onMouseLeave={() => setHoveredCardBoard(null)}
-        className="w-[100px] h-[140px] rounded-xl shadow-2xl"
+        className="w-[130px] h-[182px] rounded-xl shadow-2xl"
         whileHover={isMine ? { scale: 1.08, zIndex: 100 } : {}}
       >
         {card.faceDown ? (

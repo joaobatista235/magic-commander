@@ -36,7 +36,7 @@ export default function BattlefieldPage() {
 
       const store = useBattlefieldStore.getState();
       const { myUserId, activePlayerId, cards, currentPhase, selectedCards } = store;
-      const isMyTurn = activePlayerId === myUserId || !activePlayerId;
+      const isMyTurn = activePlayerId === myUserId;
 
       switch (e.key.toLowerCase()) {
         // D = draw one card
