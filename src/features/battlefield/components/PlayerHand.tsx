@@ -94,20 +94,21 @@ export default function PlayerHand() {
               </button>
             </div>
           </div>
-          <div className="flex items-end justify-center gap-1 overflow-x-auto pb-1 min-h-[130px]">
+          <div className="flex items-end justify-center gap-1 overflow-x-auto pb-1 min-h-[130px]" style={{ overflowY: 'visible' }}>
             {myHandCards.map((card, index) => (
               <motion.div
                 key={card.instanceId}
                 drag
                 dragMomentum={false}
-                dragElastic={0.1}
+                dragElastic={0}
+                dragSnapToOrigin={false}
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: index * 0.04 }}
                 whileHover={draggingId ? {} : { y: -20, scale: 1.08, zIndex: 50, transition: { duration: 0.15 } }}
-                whileDrag={{ scale: 1.15, zIndex: 200, cursor: "grabbing" }}
+                whileDrag={{ scale: 1.18, zIndex: 500, cursor: "grabbing", opacity: 1 }}
                 className="relative shrink-0 cursor-grab group"
-                style={{ zIndex: index }}
+                style={{ zIndex: draggingId === card.instanceId ? 500 : index, position: 'relative' }}
                 onDragStart={() => { setDraggingId(card.instanceId); setHoveredCard(null); }}
                 onDragEnd={(e) => handleDragEnd(card.instanceId, e)}
                 onClick={() => { if (!draggingId) playCardToBattlefield(card.instanceId); }}
@@ -121,6 +122,11 @@ export default function PlayerHand() {
                   className={`w-[90px] h-[126px] object-cover rounded-lg shadow-xl border-2 transition-colors ${draggingId === card.instanceId ? "border-amber-400" : "border-transparent group-hover:border-amber-500"}`}
                   onError={(e) => { (e.target as HTMLImageElement).src = "https://cards.scryfall.io/normal/back/0/0/00000000-0000-0000-0000-000000000000.jpg?1559591348"; }}
                 />
+                {draggingId === card.instanceId && (
+                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] text-amber-400 font-bold whitespace-nowrap pointer-events-none bg-zinc-900/90 px-2 py-0.5 rounded-full border border-amber-500/30">
+                    ↑ campo
+                  </div>
+                )}
               </motion.div>
             ))}
             {myHandCards.length === 0 && (

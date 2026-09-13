@@ -8,11 +8,21 @@ import { Skull, Sparkles, Hand, RotateCw, RotateCcw, Crown, Copy } from 'lucide-
 const GRID_SIZE = 10;
 const snapToGrid = (v: number) => Math.round(v / GRID_SIZE) * GRID_SIZE;
 
+// Troca a versão da imagem Scryfall de "normal" para "large" para melhor resolução
+const toHighResUrl = (url: string): string => {
+  if (!url) return url;
+  // Scryfall CDN: substitui /normal/ por /large/ na URL
+  return url.replace('/normal/', '/large/');
+};
+
 interface GameCardProps {
   card: GameCardInstance;
   isDraggable?: boolean;
   zoom?: number;
 }
+
+// Altura da área da mão em pixels — usada para detectar drop na mão
+const HAND_ZONE_HEIGHT = 180;
 
 export default function GameCard({ card, isDraggable = true, zoom = 1 }: GameCardProps) {
   const { moveCard, tapCard, changeZone, setHoveredCardBoard, updateCounters, selectedCards, toggleCardSelection, drawingArrowFrom, setDrawingArrowFrom, addArrow, cloneCard } = useBattlefieldStore();
@@ -51,11 +61,23 @@ export default function GameCard({ card, isDraggable = true, zoom = 1 }: GameCar
     }
   };
 
-  const handleDragEnd = (_event: any, info: any) => {
+  const handleDragEnd = (event: any, info: any) => {
     setIsDragging(false);
     if (!isMine) return;
+
     motionX.set(0);
     motionY.set(0);
+
+    // Detectar se o card foi solto na área da mão (parte inferior da tela)
+    const dropY = event?.clientY ?? (event?.changedTouches?.[0]?.clientY ?? 0);
+    const handThreshold = window.innerHeight - HAND_ZONE_HEIGHT;
+
+    if (dropY > handThreshold) {
+      // Solto na área da mão — retornar para a mão
+      changeZone(card.instanceId, 'HAND');
+      return;
+    }
+
     const rawX = card.x + (info.offset.x / zoom);
     const rawY = card.y + (info.offset.y / zoom);
     const newX = Math.max(0, snapToGrid(rawX));
@@ -84,6 +106,8 @@ export default function GameCard({ card, isDraggable = true, zoom = 1 }: GameCar
   const doTap = () => { tapCard(card.instanceId); setShowMenu(false); };
   const startArrow = () => { setDrawingArrowFrom(card.instanceId); setShowMenu(false); };
   const doClone = () => { cloneCard(card.instanceId); setShowMenu(false); };
+
+  const highResUrl = toHighResUrl(card.imageUrl);
 
   return (
     <>
@@ -123,10 +147,17 @@ export default function GameCard({ card, isDraggable = true, zoom = 1 }: GameCar
           </div>
         ) : (
           <img
-            src={card.imageUrl}
+            src={highResUrl}
             alt={card.name}
             className="w-full h-full object-cover rounded-xl pointer-events-none border-2 border-zinc-700/50"
             draggable={false}
+            onError={(e) => {
+              // Fallback para URL original se a versão large não existir
+              const img = e.target as HTMLImageElement;
+              if (img.src !== card.imageUrl) {
+                img.src = card.imageUrl;
+              }
+            }}
           />
         )}
 
@@ -149,6 +180,13 @@ export default function GameCard({ card, isDraggable = true, zoom = 1 }: GameCar
         {card.tapped && (
           <div className="absolute -bottom-1 -left-1 bg-blue-500/90 text-white p-1 rounded-full shadow-sm flex items-center justify-center" title="Virada (tapped)">
             <RotateCcw className="w-3 h-3" />
+          </div>
+        )}
+
+        {/* Indicador de "solte aqui" quando arrastando para baixo */}
+        {isDragging && (
+          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[9px] text-amber-400 font-bold whitespace-nowrap pointer-events-none bg-zinc-900/80 px-2 py-0.5 rounded-full border border-amber-500/30">
+            ↓ mão
           </div>
         )}
       </motion.div>

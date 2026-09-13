@@ -8,7 +8,7 @@ import ChatPanel from './ChatPanel';
 import ActionLog, { logAction } from './ActionLog';
 import ConfirmModal from '@/components/ConfirmModal';
 import { Layers, BookOpen, Flame, Crown, Swords, Heart, Skull, Sparkles, RotateCw, Check, Ghost, Sword } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { leaveRoom } from '@/services/lobbyService';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -36,6 +36,11 @@ export default function GameBoard({ navigate, roomId, userId }: GameBoardProps) 
   // Commander damage: Map of { [targetUserId]: { [commanderInstanceId]: damage } }
   const [cmdDmg, setCmdDmg] = useState<Record<string, Record<string, number>>>({});
   const prevLifeRef = useRef<Record<string, number>>({});
+
+  // Lasso selection state
+  interface SelectionRect { startX: number; startY: number; endX: number; endY: number; active: boolean; }
+  const [selectionRect, setSelectionRect] = useState<SelectionRect | null>(null);
+  const boardRef = useRef<HTMLDivElement>(null);
 
   if (!myUserId) return null;
 
@@ -97,6 +102,63 @@ export default function GameBoard({ navigate, roomId, userId }: GameBoardProps) 
     .filter(c => c.ownerId === myUserId)
     .concat(visibleCards.filter(c => c.ownerId === myUserId && c.isCommander))
     .map(c => c.instanceId);
+
+  // Lasso selection handlers
+  const handleBoardMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    // Only start lasso on direct board click (not on a card)
+    const target = e.target as HTMLElement;
+    const isBoard = target.id === 'my-board-bg' || target === e.currentTarget;
+    if (!isBoard) return;
+    e.preventDefault();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setSelectionRect({ startX: x, startY: y, endX: x, endY: y, active: true });
+    clearSelection();
+  }, [clearSelection]);
+
+  const handleBoardMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!selectionRect?.active) return;
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setSelectionRect(prev => prev ? { ...prev, endX: x, endY: y } : null);
+  }, [selectionRect]);
+
+  const handleBoardMouseUp = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!selectionRect?.active) return;
+
+    const { startX, startY, endX, endY } = selectionRect;
+    const minX = Math.min(startX, endX) / zoom;
+    const maxX = Math.max(startX, endX) / zoom;
+    const minY = Math.min(startY, endY) / zoom;
+    const maxY = Math.max(startY, endY) / zoom;
+
+    const CARD_W = 130;
+    const CARD_H = 182;
+
+    // Only select if the rectangle has some size (not just a click)
+    if (Math.abs(endX - startX) > 8 || Math.abs(endY - startY) > 8) {
+      const myFieldCards = visibleCards.filter(c => c.ownerId === myUserId);
+      const { toggleCardSelection } = useBattlefieldStore.getState();
+      myFieldCards.forEach(card => {
+        const cardRight = card.x + CARD_W;
+        const cardBottom = card.y + CARD_H;
+        const intersects = card.x < maxX && cardRight > minX && card.y < maxY && cardBottom > minY;
+        if (intersects) toggleCardSelection(card.instanceId, true);
+      });
+    }
+
+    setSelectionRect(null);
+  }, [selectionRect, visibleCards, myUserId, zoom]);
+
+  // Compute lasso rect for rendering
+  const lassoStyle = selectionRect ? {
+    left: Math.min(selectionRect.startX, selectionRect.endX),
+    top: Math.min(selectionRect.startY, selectionRect.endY),
+    width: Math.abs(selectionRect.endX - selectionRect.startX),
+    height: Math.abs(selectionRect.endY - selectionRect.startY),
+  } : null;
 
   return (
     <div className="w-full h-full flex overflow-hidden select-none text-zinc-100 relative" style={{ background: '#0c0c0e' }}>
@@ -215,8 +277,13 @@ export default function GameBoard({ navigate, roomId, userId }: GameBoardProps) 
 
         {/* Metade Inferior: Minha Area */}
         <div
+          ref={boardRef}
           className={`relative flex-1 overflow-hidden ${isMyTurn ? 'ring-2 ring-inset ring-amber-500/10' : ''}`}
           style={{ background: '#0e0e10' }}
+          onMouseDown={handleBoardMouseDown}
+          onMouseMove={handleBoardMouseMove}
+          onMouseUp={handleBoardMouseUp}
+          onMouseLeave={() => selectionRect?.active && setSelectionRect(null)}
           onClick={(e) => {
             if (e.target === e.currentTarget || (e.target as HTMLElement).id === 'my-board-bg') {
               clearSelection();
@@ -257,6 +324,19 @@ export default function GameBoard({ navigate, roomId, userId }: GameBoardProps) 
               <GameCard key={card.instanceId} card={card} isDraggable={true} zoom={zoom} />
             ))}
           </div>
+
+          {/* Lasso selection rectangle */}
+          {selectionRect && lassoStyle && (
+            <div
+              className="absolute pointer-events-none z-50"
+              style={{
+                ...lassoStyle,
+                border: '1.5px dashed #3b82f6',
+                background: 'rgba(59,130,246,0.08)',
+                borderRadius: 4,
+              }}
+            />
+          )}
         </div>
       </div>
 

@@ -56,6 +56,12 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Garantir visibilidade dos placeholders no tema escuro */
+  input::placeholder,
+  textarea::placeholder {
+    color: #a1a1aa; /* zinc-400 */
+    opacity: 1;
+  }
 }
 
 ::-webkit-scrollbar {

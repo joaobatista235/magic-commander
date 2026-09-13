@@ -138,7 +138,7 @@ export default function LobbyPage() {
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nome da sala..."
             autoComplete="off"
-            className="h-12 pl-10 bg-zinc-900/50 border-zinc-800 text-zinc-100 text-lg placeholder:text-zinc-600"
+            className="h-12 pl-10 bg-zinc-900/50 border-zinc-800 text-zinc-100 text-lg placeholder:text-zinc-400"
           />
         </div>
 
@@ -214,7 +214,7 @@ export default function LobbyPage() {
                   onChange={e => setNewRoomName(e.target.value)}
                   placeholder="Ex: Mesa dos Amigos"
                   autoComplete="off"
-                  className="bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-600"
+                  className="bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-400"
                 />
               </div>
 
@@ -227,7 +227,7 @@ export default function LobbyPage() {
                   onChange={e => setNewRoomPassword(e.target.value)}
                   placeholder="Deixe em branco para sala pública"
                   autoComplete="off"
-                  className="bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-600"
+                  className="bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-400"
                 />
               </div>
 
@@ -260,7 +260,7 @@ export default function LobbyPage() {
                 onChange={e => { setEnteredPassword(e.target.value); setPasswordError(''); }}
                 placeholder="Senha da sala"
                 autoComplete="off"
-                className="bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-600"
+                className="bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-400"
               />
               {passwordError && <p className="text-sm text-red-400">{passwordError}</p>}
 

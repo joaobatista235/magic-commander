@@ -178,7 +178,7 @@ export default function LoginPage() {
                   autoComplete="email"
                   spellCheck={false}
                   placeholder="seu@email.com"
-                  className="h-12 px-4 rounded-xl bg-zinc-900/80 border border-zinc-800 text-zinc-100 text-sm placeholder:text-zinc-700 focus:outline-none focus:border-amber-600/50 focus:ring-1 focus:ring-amber-600/30 transition-all"
+                  className="h-12 px-4 rounded-xl bg-zinc-900/80 border border-zinc-800 text-zinc-100 text-sm placeholder:text-zinc-400 focus:outline-none focus:border-amber-600/50 focus:ring-1 focus:ring-amber-600/30 transition-all"
                 />
               </div>
 
@@ -194,7 +194,7 @@ export default function LoginPage() {
                   onChange={e => setPassword(e.target.value)}
                   autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                   placeholder="••••••••"
-                  className="h-12 px-4 rounded-xl bg-zinc-900/80 border border-zinc-800 text-zinc-100 text-sm placeholder:text-zinc-700 focus:outline-none focus:border-amber-600/50 focus:ring-1 focus:ring-amber-600/30 transition-all"
+                  className="h-12 px-4 rounded-xl bg-zinc-900/80 border border-zinc-800 text-zinc-100 text-sm placeholder:text-zinc-400 focus:outline-none focus:border-amber-600/50 focus:ring-1 focus:ring-amber-600/30 transition-all"
                 />
               </div>
 
