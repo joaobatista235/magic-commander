@@ -125,7 +125,7 @@ export default function GameBoard({ navigate, roomId, userId }: GameBoardProps) 
     setSelectionRect(prev => prev ? { ...prev, endX: x, endY: y } : null);
   }, [selectionRect]);
 
-  const handleBoardMouseUp = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  const handleBoardMouseUp = useCallback((_e: React.MouseEvent<HTMLDivElement>) => {
     if (!selectionRect?.active) return;
 
     const { startX, startY, endX, endY } = selectionRect;
