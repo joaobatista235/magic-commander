@@ -3,6 +3,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { motion } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import type { GameCardInstance } from "@/stores/battlefieldStore";
+import { Hand } from "lucide-react";
 
 export default function PlayerHand() {
   const { cards, changeZone, moveCard, drawCards, mulligan } = useBattlefieldStore();
@@ -55,7 +56,11 @@ export default function PlayerHand() {
           onClick={() => setIsExpanded(prev => !prev)}
           className="bg-zinc-900/90 backdrop-blur border border-zinc-700/60 text-zinc-400 hover:text-zinc-100 text-xs px-4 py-1.5 rounded-full transition-colors"
         >
-          {isExpanded ? "? Esconder mao" : `? Mostrar mao (${myHandCards.length})`}
+          {isExpanded ? (
+            <><Hand className="w-3 h-3" /> Esconder mão</>
+          ) : (
+            <><Hand className="w-3 h-3" /> Mostrar mão ({myHandCards.length})</>
+          )}
         </button>
       </div>
 
@@ -79,7 +84,7 @@ export default function PlayerHand() {
         <div className="bg-zinc-950/90 backdrop-blur-md border-t border-zinc-800 px-4 py-3">
           <div className="flex items-center justify-between mb-2">
             <span className="text-zinc-500 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-              Mao {myHandCards.length} {myHandCards.length === 1 ? "carta" : "cartas"}
+              Mão · {myHandCards.length} {myHandCards.length === 1 ? "carta" : "cartas"}
               {draggingId && <span className="text-amber-400 animate-pulse">Arraste para a mesa</span>}
             </span>
             <div className="flex items-center gap-2">
@@ -87,7 +92,7 @@ export default function PlayerHand() {
                 Comprar 7 Cartas
               </button>
               <button
-                onClick={() => { if (confirm("Devolver mao e comprar 7 novas cartas?")) mulligan(); }}
+                onClick={() => { if (confirm("Devolver mão e comprar 7 novas cartas?")) mulligan(); }}
                 className="bg-amber-600/20 hover:bg-amber-600/40 text-amber-500 border border-amber-600/30 text-xs px-3 py-1 rounded transition-colors font-semibold"
               >
                 Mulligan
@@ -131,7 +136,7 @@ export default function PlayerHand() {
             ))}
             {myHandCards.length === 0 && (
               <div className="flex-1 flex items-center justify-center text-zinc-600 italic text-sm h-[130px]">
-                Sua mao esta vazia - compre uma carta do grimorio.
+                Sua mão está vazia — compre uma carta do grimório.
               </div>
             )}
           </div>

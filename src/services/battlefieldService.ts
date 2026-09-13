@@ -4,6 +4,7 @@ import type { RealtimeChannel } from '@supabase/supabase-js';
 // Game events that can be broadcasted
 export type BattlefieldEventType =
   | 'SYNC_PLAYER_STATE'
+  | 'SYNC_RESPONSE'
   | 'MOVE_CARD'
   | 'TAP_CARD'
   | 'CHANGE_ZONE'

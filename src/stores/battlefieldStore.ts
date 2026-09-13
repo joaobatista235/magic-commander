@@ -488,11 +488,9 @@ export const useBattlefieldStore = create<BattlefieldState>((set, get) => ({
         const { cards: remoteCards, player: remotePlayer } = payload;
         set((state) => {
           const newCards = { ...state.cards };
-          // remoteCards é um array de GameCardInstance
           remoteCards.forEach((c: GameCardInstance) => {
             newCards[c.instanceId] = c;
           });
-          
           return {
             cards: newCards,
             players: {
@@ -501,10 +499,39 @@ export const useBattlefieldStore = create<BattlefieldState>((set, get) => ({
             }
           };
         });
-        
-        // Quando alguém entra (ou resincroniza), eu envio o MEU estado de volta para ele conhecer minha mesa
-        // Mas para evitar loop infinito, poderíamos mandar um 'SYNC_RESPONSE' ou similar. 
-        // Por ora, vamos simplificar.
+
+        // Responder com o NOSSO estado para que o jogador que acabou de
+        // entrar veja a nossa mesa. Usamos SYNC_RESPONSE para não criar
+        // loop (SYNC_RESPONSE não dispara outra resposta).
+        {
+          const { myUserId, cards: currentCards, players: currentPlayers } = get();
+          if (myUserId) {
+            const myCardsList = Object.values(currentCards).filter(c => c.ownerId === myUserId);
+            const myPlayer = currentPlayers[myUserId];
+            battlefieldService.broadcast('SYNC_RESPONSE', myUserId, {
+              cards: myCardsList,
+              player: myPlayer,
+            });
+          }
+        }
+        break;
+      }
+      case 'SYNC_RESPONSE': {
+        // Mesmo comportamento do SYNC_PLAYER_STATE, mas SEM disparar nova resposta
+        const { cards: remoteCards, player: remotePlayer } = payload;
+        set((state) => {
+          const newCards = { ...state.cards };
+          remoteCards.forEach((c: GameCardInstance) => {
+            newCards[c.instanceId] = c;
+          });
+          return {
+            cards: newCards,
+            players: {
+              ...state.players,
+              [remotePlayer.userId]: remotePlayer
+            }
+          };
+        });
         break;
       }
       case 'MOVE_CARD': {
