@@ -150,12 +150,18 @@ export const useBattlefieldStore = create<BattlefieldState>((set, get) => ({
     const freshPlayers: Record<string, any> = {};
     freshPlayers[myUserId] = { userId: myUserId, life: 40, commanderDamage: {} };
 
-    set({ roomId, myUserId, cards: freshCards, players: freshPlayers, hoveredCardBoard: null, selectedCards: [], arrows: [] });
+    // activePlayerId: mantém o turno atual se já foi definido por outro jogador,
+    // caso contrário o primeiro a entrar assume o turno inicial.
+    const currentActive = get().activePlayerId;
+    const newActivePlayerId = currentActive ?? myUserId;
+
+    set({ roomId, myUserId, cards: freshCards, players: freshPlayers, hoveredCardBoard: null, selectedCards: [], arrows: [], activePlayerId: newActivePlayerId });
 
     // Transmite meu estado para os outros na sala (onde minhas cartas estão)
     battlefieldService.broadcast('SYNC_PLAYER_STATE', myUserId, {
       cards: myDeckCards,
       player: freshPlayers[myUserId],
+      activePlayerId: newActivePlayerId,
     });
   },
 
@@ -485,7 +491,7 @@ export const useBattlefieldStore = create<BattlefieldState>((set, get) => ({
 
     switch (type) {
       case 'SYNC_PLAYER_STATE': {
-        const { cards: remoteCards, player: remotePlayer } = payload;
+        const { cards: remoteCards, player: remotePlayer, activePlayerId: remoteActiveId } = payload;
         set((state) => {
           const newCards = { ...state.cards };
           remoteCards.forEach((c: GameCardInstance) => {
@@ -496,7 +502,9 @@ export const useBattlefieldStore = create<BattlefieldState>((set, get) => ({
             players: {
               ...state.players,
               [remotePlayer.userId]: remotePlayer
-            }
+            },
+            // Respeitar o activePlayerId remoto somente se não temos um definido
+            ...(state.activePlayerId === null && remoteActiveId ? { activePlayerId: remoteActiveId } : {}),
           };
         });
 
@@ -504,13 +512,14 @@ export const useBattlefieldStore = create<BattlefieldState>((set, get) => ({
         // entrar veja a nossa mesa. Usamos SYNC_RESPONSE para não criar
         // loop (SYNC_RESPONSE não dispara outra resposta).
         {
-          const { myUserId, cards: currentCards, players: currentPlayers } = get();
+          const { myUserId, cards: currentCards, players: currentPlayers, activePlayerId: currentActive } = get();
           if (myUserId) {
             const myCardsList = Object.values(currentCards).filter(c => c.ownerId === myUserId);
             const myPlayer = currentPlayers[myUserId];
             battlefieldService.broadcast('SYNC_RESPONSE', myUserId, {
               cards: myCardsList,
               player: myPlayer,
+              activePlayerId: currentActive,
             });
           }
         }
@@ -518,7 +527,7 @@ export const useBattlefieldStore = create<BattlefieldState>((set, get) => ({
       }
       case 'SYNC_RESPONSE': {
         // Mesmo comportamento do SYNC_PLAYER_STATE, mas SEM disparar nova resposta
-        const { cards: remoteCards, player: remotePlayer } = payload;
+        const { cards: remoteCards, player: remotePlayer, activePlayerId: remoteActiveId } = payload;
         set((state) => {
           const newCards = { ...state.cards };
           remoteCards.forEach((c: GameCardInstance) => {
@@ -529,7 +538,9 @@ export const useBattlefieldStore = create<BattlefieldState>((set, get) => ({
             players: {
               ...state.players,
               [remotePlayer.userId]: remotePlayer
-            }
+            },
+            // Aceitar o activePlayerId da resposta se ainda não definido
+            ...(state.activePlayerId === null && remoteActiveId ? { activePlayerId: remoteActiveId } : {}),
           };
         });
         break;

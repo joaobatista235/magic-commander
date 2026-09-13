@@ -37,7 +37,7 @@ class BattlefieldService {
   private onMessageCallback: ((event: BattlefieldEvent) => void) | null = null;
   private chatListeners: Array<(msg: ChatMessage) => void> = [];
 
-  connect(roomId: string, onMessage: (event: BattlefieldEvent) => void) {
+  connect(roomId: string, onMessage: (event: BattlefieldEvent) => void, onReady?: () => void) {
     if (this.channel) {
       this.disconnect();
     }
@@ -62,6 +62,9 @@ class BattlefieldService {
       })
       .subscribe((status) => {
         console.log(`Battlefield Realtime Status [${roomId}]:`, status);
+        if (status === 'SUBSCRIBED' && onReady) {
+          onReady();
+        }
       });
   }
 

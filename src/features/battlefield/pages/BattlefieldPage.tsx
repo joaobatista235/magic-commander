@@ -134,14 +134,20 @@ export default function BattlefieldPage() {
       }
 
       const myInstances = generateDeckInstances(user.id, deckCards);
-      initGame(roomId, user.id, myInstances);
 
-      battlefieldService.connect(roomId, (event) => {
-        handleBroadcast(event);
-      });
-
-      logAction({ type: 'system', actorName: user.displayName || user.email?.split('@')[0] || 'Jogador', message: 'entrou na partida.' });
-      setLoading(false);
+      // Conectar ao canal PRIMEIRO — o initGame (e o broadcast SYNC_PLAYER_STATE)
+      // só ocorre no callback onReady, quando o canal está confirmado como SUBSCRIBED.
+      // Antes dessa ordem, o broadcast era descartado silenciosamente (channel = null).
+      battlefieldService.connect(
+        roomId,
+        (event) => { handleBroadcast(event); },
+        () => {
+          // Canal pronto — agora é seguro inicializar e anunciar nossa presença
+          initGame(roomId, user.id, myInstances);
+          logAction({ type: 'system', actorName: user.displayName || user.email?.split('@')[0] || 'Jogador', message: 'entrou na partida.' });
+          setLoading(false);
+        }
+      );
     };
 
     startBattlefield();
